@@ -4,20 +4,23 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV POSTGRESQLTMPROOT temprootpass
 
 # Update and upgrade
-RUN apt-get update
-RUN apt-get -y upgrade
+RUN apt-get update && apt-get -y upgrade
+RUN apt-get install -y software-properties-common python-software-properties apt-transport-https
+RUN echo 'deb http://mirrordirector.raspbian.org/raspbian/ jessie main contrib non-free rpi' >> /etc/apt/sources.list
+RUN echo 'deb [arch=armhf] https://apt.dockerproject.org/repo raspbian-jessie main' >> /etc/apt/sources.list
+RUN echo 'deb https://packagecloud.io/Hypriot/rpi/debian/ jessie main' >> /etc/apt/sources.list
+RUN echo 'deb https://packagecloud.io/Hypriot/Schatzkiste/debian/ jessie main' >> /etc/apt/sources.list
+#RUN echo 'deb http://archive.raspberrypi.org/debian/ jessie main' >> /etc/apt/sources.list
+RUN gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv F76221572C52609D && gpg --export --armor F76221572C52609D | apt-key add -
+RUN gpg --keyserver pgpkeys.mit.edu --recv-key 37BBEE3F7AD95B3F && gpg -a --export 37BBEE3F7AD95B3F| apt-key add -
+RUN apt-get update && apt-get -y upgrade
 
-# Install Apache
-RUN apt-get -y install apache2
-
-# Install PostgreSQL
-RUN apt-get install -y libpq-dev postgresql-9.4
-
-RUN apt-get clean
+# Install Apache and PostgreSQL
+RUN apt-get install -y apache2 libpq-dev postgresql-9.4 && apt-get clean
 
 RUN cp /etc/ssl/private/ssl-cert-snakeoil.key /var/lib/postgresql/9.4/main/server.key && \
-        chown postgres:postgres /var/lib/postgresql/9.4/main/server.key && \
-            chmod 740 /var/lib/postgresql/9.4/main/server.key
+    chown postgres:postgres /var/lib/postgresql/9.4/main/server.key && \
+    chmod 740 /var/lib/postgresql/9.4/main/server.key
 RUN mkdir -p /var/run/postgresql/9.4-main.pg_stat_tmp
 RUN chown -R postgres:postgres /var/run/postgresql/9.4-main.pg_stat_tmp
 
@@ -30,10 +33,3 @@ ONBUILD ADD diaspora.yml  /home/diaspora/diaspora/config/diaspora.yml
 ONBUILD ADD diaspora.crt  /home/diaspora/diaspora.crt
 ONBUILD ADD diaspora.key  /home/diaspora/diaspora.key
 ONBUILD RUN /home/diaspora/install.sh
-
-ONBUILD ADD diaspora.conf /etc/apache2/sites-enabled/000-default.conf
-ONBUILD RUN a2enmod ssl proxy proxy_balancer proxy_http headers rewrite lbmethod_byrequests slotmem_shm
-
-ONBUILD EXPOSE 80
-ONBUILD EXPOSE 443
-ONBUILD CMD ["/bin/bash", "/home/diaspora/start.sh"] 
