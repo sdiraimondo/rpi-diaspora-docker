@@ -41,3 +41,5 @@ ONBUILD ADD diaspora.yml  /home/diaspora/diaspora/config/diaspora.yml
 ONBUILD ADD diaspora.crt  /home/diaspora/diaspora.crt
 ONBUILD ADD diaspora.key  /home/diaspora/diaspora.key
 ONBUILD RUN /home/diaspora/install.sh
+
+EXPOSE 80
