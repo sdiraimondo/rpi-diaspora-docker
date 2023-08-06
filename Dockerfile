@@ -1,4 +1,4 @@
-FROM resin/rpi-raspbian:jessie
+FROM resin/rpi-raspbian:latest
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV POSTGRESQLTMPROOT temprootpass
